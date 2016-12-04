@@ -1,0 +1,105 @@
+Operación Básica
+
+1. ¿Cómo ejecutamos un archivo que se llama exactamente como un builtin?
+
+La forma seria utilizando el camino absoluto o relativo al archivo, ya que
+si queremos ejecutarlo con la búsqueda en secuencia en la variable de
+entorno PATH, primero se buscará en los comandos internos
+implementados en bash.
+
+2. ¿Por qué las recomendaciones de seguridad indican que es peligroso tener ./ en PATH al más puro estilo DOS?
+
+Es peligroso tener ./ en el PATH ya que podría ejecutarse cualquier
+archivo sin anteponerlo antes del nombre del ejecutable.
+
+3. Supongamos que existen 2 comandos posibles dentro de la secuencia que contiene PATH, donde el primero en la secuencia no
+está marcado como ejecutable y el segundo si. ¿Qué hace el interprete bash, ejecuta el segundo o informa que el primero no
+tiene permiso de ejecución? (incorporen esta semántica a baash).
+
+El intérprete informa que el primero no tiene permiso de ejecución.
+
+4. Indique que sucede cuando se tiene un directorio en el pwd actual con el mismo nombre que un archivo ejecutable PATH. ¿Dice que no puede ejecutar un directorio o ejecuta el comando que encontró? (sigan esta forma en baash).
+
+Ejecuta el comando que encontró.
+
+5. Obtengan la lógica más sencilla que unifique los tres tipos de búsqueda.
+
+If (argumv [posición][0] == ‘.’ || argumv [posición][0] == ‘/’) – Crear hijo y ejecutar archivo.
+Else – Buscar en PATH y si encuentra archivo crear hijo y ejecutarlo.
+
+6. ¿Podemos poner directorios relativos en PATH? (hagan los propio con baash).
+
+En PATH pueden agregarse directorios relativos. 
+
+
+Procesos en segundo plano
+
+1. Investiguen cuales son los comandos internos para el manejo de procesos en background de bash.
+
+<comando> & --- Ejecuta el proceso en segundo plano.
+Bg [PID] --- Lleva el proceso PID a background.
+Fg [PID] --- Lleva el proceso PID a foreground.
+
+2. En el ejemplo de arriba el operador ‘&’ funciona como operador de composición paralela. Hay un operador de composición ecuencial en Bourne Shell. ¿Cuál es?
+
+El operador de composición secuencial es ‘;’ (punto y coma).
+
+3. Investiguen como bash forma el árbol de procesos cuando ejecutamos cmd1 & cmd2 & cmd3 & ... & cmd-n. Piensen en la
+respuesta y luego utilicen pstree para corroborarla. Apliquen los resultados de su observación a baash.
+
+Cuando se ejecutan los comandos, los mismos lo hacen en paralelo de acuerdo a la siguiente lógica:
+El proceso de arranque init en GNU/Linux es el primer proceso que se
+ejecuta en el sistema. El Kernel es quien cede control al init, donde se
+crean los primeros procesos hijos y a su vez se ejecutan otros procesos.
+Init, lee el archivo /etc/ttytab para ver cuántas terminales hay y mediante
+fork crea un proceso hijo para cada terminal. Cada proceso hijo ejecuta
+getty, quien imprime el prompt de login y obtiene el nombre de usuario.
+Cuando el usuario ingresa al sistema, se ejecuta el login con el nombre
+como argumento y se ejecuta el Shell desde el usuario. Este último se
+especifica en el etc/passwd, generalmente sh. El Shell espera por un
+comando y luego lanza un Fork y un Exec para cada comando.
+
+4. Indique cuantas letras ‘a’ debería imprimir el siguiente programa:
+
+Fork ( );
+Fork ( );
+Fork ( );
+Printf (“a”);
+
+Del primer fork salen 2 “a” ya que se crea una copia.
+Del segundo fork salen 2 más “a” uno del original y otro por la copia que
+crea el primer fork.
+Del tercero se imprimen 2 por cada uno, o sea 4 veces. En total se
+imprimen 8 “a”.
+
+
+Redirección de la Entrada/Salida
+
+1. Las corrientes estándar stdout y stderr están dirigidas ambas a la
+consola. ¿Cómo podemos utilizar los operadores de redirección
+para separarlas? (comando) operador archivo.txt
+
+Los operadores para cada redirección serian:
+1 > redirige el STDOUT a un archivo, si existen datos lo sobrescribe.
+2 > redirige el STDERR a un archivo.
+
+2. De más ejemplos de cómo usar la redirección de entrada. Tenga
+cuidado que muchos programas deshabilitan la posibilidad de
+redirigir la entrada estándar a otra cosa que no sea una terminal.
+
+Otro ejemplo es el siguiente (en forma genérica): (comando) < archivo
+Lo que hace esto es imprimir en pantalla (baash) lo que haga el
+comando con el archivo.
+Ejemplo: tail -n < archivo.txt
+Muestra las ultimas n lineas del archivo.txt
+
+
+Tuberías (pipes)
+
+1. Los pipes existen en el filesystem mientras dura el comando.
+¿Dónde se encuentran y que atributos tiene?
+
+Los pipes se emplean para interconectar procesos, es decir, podemos
+realizar varios procesos con una sola línea de comando.
+Su uso más habitual es pasar el resultado de la ejecución de un
+comando a la entrada de otro.
